@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación SENATIC</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            text-align: center;
+            color: #004d99;
+        }
+        .header-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+        }
+        .header-fields div {
+            display: flex;
+            flex-direction: column;
+        }
+        .header-fields label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .header-fields input, .header-fields select, .header-fields textarea {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .header-fields select {
+            text-transform: none;
+        }
+        .header-fields textarea {
+            resize: vertical;
+            min-height: 38px;
+            overflow: hidden;
+        }
+        #fecha {
+            font-size: 1.1em;
+        }
+        /* Estilo para el campo de nombre del aprendiz */
+        .nombre-aprendiz {
+            background-color: #e6f7ff; /* Fondo azul claro */
+        }
+        .question-block {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            background-color: #fff3e0;
+        }
+        .question-block p {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .question-type {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 10px;
+            text-align: right;
+        }
+        .options label {
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .options input {
+            margin-right: 10px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #evaluateBtn {
+            background-color: #007bff;
+            color: #fff;
+        }
+        #evaluateBtn:hover {
+            background-color: #0056b3;
+        }
+        #secondAttemptBtn {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        #secondAttemptBtn:hover {
+            background-color: #e0a800;
+        }
+        #downloadPdfBtn {
+            background-color: #28a745;
+            color: #fff;
+        }
+        #downloadPdfBtn:hover {
+            background-color: #218838;
+        }
+        .buttons button[disabled] {
+            background-color: #ccc;
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            font-size: 1.5rem;
+            display: none;
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            display: none;
+            text-align: center;
+        }
+        .message-box button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            display: none; /* Ocultar por defecto */
+        }
+        .feedback.correct {
+            color: green;
+        }
+        .feedback.incorrect {
+            color: red;
+        }
+        #scoreContainer {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #questions-container textarea {
+            width: 100%;
+            height: 80px;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: vertical;
+        }
+        .large-fill-in-textarea {
+            height: 100px;
+            font-size: 16px;
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        .numeric-matching-item {
+            display: grid;
+            grid-template-columns: 1fr 8ch;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        .numeric-matching-item p {
+            margin: 0;
+            padding-right: 10px;
+        }
+        .numeric-matching-item input {
+            text-align: center;
+            border-radius: 8px;
+            background-color: #e6f7ff;
+            border: 1px solid #b3e0ff;
+            padding: 8px 5px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .numeric-matching-item input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        .matching-list {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="message-box" id="messageBox">
+    <p id="messageText"></p>
+    <button id="closeMessage">Aceptar</button>
+</div>
+
+<div class="container">
+    <h1>EVALUACION</h1>
+    <h2>PROGRAMA SENATIC</h2>
+    <h3>TECNICO SISTEMAS TELEINFORMATICOS</h3>
+
+    <div class="header-fields">
+        <div>
+            <label for="competencia">COMPETENCIA:</label>
+            <select id="competencia" required>
+                <option value="">Seleccione una opción</option>
+                <option value="MANTENIMIENTO DE LOS EQUIPOS DE CÓMPUTO">MANTENIMIENTO DE LOS EQUIPOS DE CÓMPUTO</option>
+                <option value="OPERACIÓN DE HERRAMIENTAS INFORMÁTICAS">OPERACIÓN DE HERRAMIENTAS INFORMÁTICAS</option>
+                <option value="VERIFICACIÓN DEL FUNCIONAMIENTO DE LA RED DE DATOS">VERIFICACIÓN DEL FUNCIONAMIENTO DE LA RED DE DATOS</option>
+            </select>
+        </div>
+        <div>
+            <label for="rap">RAP:</label>
+            <textarea id="rap" required rows="1"></textarea>
+        </div>
+        <div>
+            <label for="tipoInstrumento">TIPO DE INSTRUMENTO:</label>
+            <select id="tipoInstrumento" required>
+                <option value="">Seleccione una opción</option>
+                <option value="CONOCIMIENTO">CONOCIMIENTO</option>
+                <option value="DESEMPEÑO">DESEMPEÑO</option>
+                <option value="PRODUCTO">PRODUCTO</option>
+            </select>
+        </div>
+        <div>
+            <label for="ficha">FICHA:</label>
+            <select id="ficha" required>
+                <option value="">Seleccione una opción</option>
+                <option value="3010320">3010320</option>
+                <option value="3010341">3010341</option>
+                <option value="3002298">3002298</option>
+            </select>
+        </div>
+        <div>
+            <label for="fecha">FECHA:</label>
+            <input type="date" id="fecha" required>
+        </div>
+        <div>
+            <label for="nombreAprendiz">NOMBRE DEL APRENDIZ:</label>
+            <input type="text" id="nombreAprendiz" required class="nombre-aprendiz" uppercase autocomplete="off">
+        </div>
+        <div>
+            <label for="nombreInstructor">NOMBRE DEL INSTRUCTOR:</label>
+            <input type="text" id="nombreInstructor" value="RAFAEL MONTES MARTINEZ" required uppercase>
+        </div>
+    </div>
+    
+    <form id="evaluationForm">
+        <div id="questions-container">
+            <!-- Las preguntas se renderizarán aquí por JavaScript -->
+        </div>
+
+        <div id="scoreContainer" class="score-container" style="display: none;">
+            <h3>Puntaje Total: <span id="finalScore">0</span> / <span id="totalQuestions">0</span></h3>
+        </div>
+
+        <div class="buttons">
+            <button type="button" id="evaluateBtn" disabled>EVALUAR RESPUESTAS</button>
+            <button type="button" id="secondAttemptBtn" disabled>SEGUNDO INTENTO</button>
+            <button type="button" id="downloadPdfBtn" disabled>DESCARGAR PDF</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const questionsContainer = document.getElementById('questions-container');
+        const evaluateBtn = document.getElementById('evaluateBtn');
+        const secondAttemptBtn = document.getElementById('secondAttemptBtn');
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        const scoreContainer = document.getElementById('scoreContainer');
+        const finalScoreSpan = document.getElementById('finalScore');
+        const totalQuestionsSpan = document.getElementById('totalQuestions');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const closeMessageBtn = document.getElementById('closeMessage');
+        const fechaInput = document.getElementById('fecha');
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        fechaInput.value = `${year}-${month}-${day}`;
+
+        const questions = [
+            {
+                "id": 1,
+                "type": "Definición y Opción Múltiple",
+                "question": "Explica en tus propias palabras qué es un sistema operativo y por qué es importante para el usuario, basándote en el texto proporcionado sobre 'Conceptos del Sistema Operativo Windows'.",
+                "options": [
+                    "1. Es el software que administra los recursos de hardware y software de una computadora, permitiendo al usuario interactuar con el equipo de forma sencilla y realizar diversas tareas.",
+                    "2. Es un software que administra solo el hardware de la computadora, sin interactuar con el usuario.",
+                    "3. Es un programa para editar fotos y videos.",
+                    "4. Es una herramienta que solo sirve para programar y compilar código."
+                ],
+                "correctAnswer": "1. Es el software que administra los recursos de hardware y software de una computadora, permitiendo al usuario interactuar con el equipo de forma sencilla y realizar diversas tareas."
+            },
+            {
+                "id": 2,
+                "type": "Opción Múltiple (única respuesta)",
+                "question": "¿En qué década fue lanzado por primera vez el sistema operativo Windows?",
+                "options": ["Los 60", "Los 70", "Los 80", "Los 90"],
+                "correctAnswer": "Los 80"
+            },
+            {
+                "id": 3,
+                "type": "Opción Múltiple (múltiples respuestas)",
+                "question": "¿Cuáles de las siguientes afirmaciones son verdaderas sobre Microsoft Windows, según el texto? (Selecciona 2 opciones)",
+                "options": ["Es un sistema operativo desarrollado por Microsoft.", "Permite la administración de los recursos de una computadora.", "Ha tenido una cuota de mercado inferior al 90%.", "Salió en los 2000."],
+                "correctAnswers": ["Es un sistema operativo desarrollado por Microsoft.", "Permite la administración de los recursos de una computadora."]
+            },
+            {
+                "id": 4,
+                "type": "Relacionar Columnas (Numérico)",
+                "question": "Relaciona la definición con el número de la característica de Windows que le corresponde.",
+                "referenceList": [
+                    "1. Interfaz Gráfica de Usuario (GUI)",
+                    "2. Gestión de Archivos y Carpetas",
+                    "3. Multitarea",
+                    "4. Soporte de Hardware",
+                    "5. Conectividad de Red",
+                    "6. Seguridad",
+                    "7. Actualizaciones"
+                ],
+                "definitions": [
+                    "Posibilita la ejecución simultánea de múltiples aplicaciones.",
+                    "Permite organizar, almacenar y acceder a la información de manera eficiente.",
+                    "Microsoft lanza actualizaciones periódicas para mejorar la seguridad, el rendimiento y añadir nuevas características.",
+                    "Proporciona una interfaz intuitiva con ventanas, iconos y un cursor, facilitando la interacción del usuario."
+                ],
+                "correctAnswers": {
+                    "Posibilita la ejecución simultánea de múltiples aplicaciones.": 3,
+                    "Permite organizar, almacenar y acceder a la información de manera eficiente.": 2,
+                    "Microsoft lanza actualizaciones periódicas para mejorar la seguridad, el rendimiento y añadir nuevas características.": 7,
+                    "Proporciona una interfaz intuitiva con ventanas, iconos y un cursor, facilitando la interacción del usuario.": 1
+                }
+            },
+            {
+                "id": 5,
+                "type": "Verdadero o Falso",
+                "question": "Las versiones más recientes de Windows son la 8 y 10.",
+                "options": ["Verdadero", "Falso"],
+                "correctAnswer": "Falso"
+            },
+            {
+                "id": 6,
+                "type": "Definición y Opción Múltiple",
+                "question": "Explica en tus propias palabras qué es el licenciamiento de Windows y, basándote en el texto, selecciona la opción que mejor describe su propósito.",
+                "options": [
+                    "1. Es un proceso técnico para instalar Windows en múltiples computadoras sin costo.",
+                    "2. Son los acuerdos legales que otorgan el derecho a usar el software de Microsoft, diseñados para diferentes necesidades y presupuestos.",
+                    "3. Es un tipo de hardware que se conecta a la computadora para activar Windows.",
+                    "4. Se refiere únicamente a la compra de software de Microsoft para uso personal."
+                ],
+                "correctAnswer": "2. Son los acuerdos legales que otorgan el derecho a usar el software de Microsoft, diseñados para diferentes necesidades y presupuestos."
+            },
+            {
+                "id": 7,
+                "type": "Opción Múltiple (múltiples respuestas)",
+                "question": "¿Cuáles de los siguientes son tipos de licenciamiento de Windows mencionados en el texto? (Selecciona 3 opciones correctas)",
+                "options": [
+                    "Licencia de Código Abierto",
+                    "Licencia OEM",
+                    "Licencia de Prueba Gratuita",
+                    "Licencia Retail",
+                    "Licencia Educativa",
+                    "Licencia por Volumen"
+                ],
+                "correctAnswers": [
+                    "Licencia OEM",
+                    "Licencia Retail",
+                    "Licencia por Volumen"
+                ]
+            },
+            {
+                "id": 8,
+                "type": "Completar",
+                "question": "Las licencias ___________ son las más económicas y vienen preinstaladas en equipos nuevos, generalmente comprados directamente al fabricante.",
+                "correctAnswer": "OEM"
+            },
+            {
+                "id": 9,
+                "type": "Completar",
+                "question": "Windows ___________ es la versión diseñada para uso doméstico y personal.",
+                "correctAnswer": "HOME"
+            },
+            {
+                "id": 10,
+                "type": "Definición y Opción Múltiple",
+                "question": "Explica en tus propias palabras qué son los 'Utilitarios de Windows' y, basándote en el texto, selecciona la opción que mejor describe su propósito.",
+                "options": [
+                    "1. Son programas para jugar videojuegos en Windows.",
+                    "2. Son herramientas para mantener, optimizar y mejorar el funcionamiento del sistema operativo y la productividad del usuario.",
+                    "3. Son componentes de hardware esenciales para la instalación de Windows."
+                ],
+                "correctAnswer": "2. Son herramientas para mantener, optimizar y mejorar el funcionamiento del sistema operativo y la productividad del usuario."
+            },
+            {
+                "id": 11,
+                "type": "Opción Múltiple (múltiples respuestas)",
+                "question": "¿Cuáles de los siguientes son utilitarios nativos de Windows mencionados en el texto? (Selecciona 5 opciones correctas)",
+                "options": [
+                    "Administrador de Tareas",
+                    "Microsoft Word",
+                    "Explorador de Archivos",
+                    "Google Chrome",
+                    "Liberador de Espacio en Disco",
+                    "Windows Defender (o Seguridad de Windows)",
+                    "Adobe Photoshop",
+                    "Herramienta de Recortes"
+                ],
+                "correctAnswers": [
+                    "Administrador de Tareas",
+                    "Explorador de Archivos",
+                    "Liberador de Espacio en Disco",
+                    "Windows Defender (o Seguridad de Windows)",
+                    "Herramienta de Recortes"
+                ]
+            },
+            {
+                "id": 12,
+                "type": "Opción Múltiple (múltiples respuestas)",
+                "question": "¿Cuáles de los siguientes son ejemplos de utilitarios de terceros comunes, es decir, programas que no vienen preinstalados con Windows? (Selecciona 6 opciones correctas)",
+                "options": [
+                    "Microsoft Office",
+                    "Paint",
+                    "Google Chrome",
+                    "VLC Media Player",
+                    "Bloc de notas",
+                    "WinRAR",
+                    "Adobe Photoshop",
+                    "TeamViewer",
+                    "Calculadora"
+                ],
+                "correctAnswers": [
+                    "Microsoft Office",
+                    "Google Chrome",
+                    "VLC Media Player",
+                    "WinRAR",
+                    "Adobe Photoshop",
+                    "TeamViewer"
+                ]
+            }
+        ];
+        
+        let attemptCount = 0;
+        let score = 0;
+
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.style.display = 'block';
+        }
+
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.style.display = 'none';
+        });
+
+        function renderQuestions() {
+            questionsContainer.innerHTML = '';
+            questions.forEach(q => {
+                const questionBlock = document.createElement('div');
+                questionBlock.className = 'question-block';
+                questionBlock.setAttribute('data-question-id', q.id);
+
+                const questionType = document.createElement('p');
+                questionType.className = 'question-type';
+                questionType.textContent = `(${q.type})`;
+                questionBlock.appendChild(questionType);
+
+                const questionText = document.createElement('p');
+                questionText.innerHTML = `${q.id}. ${q.question}`;
+                questionBlock.appendChild(questionText);
+
+                if (q.type === 'Definición y Opción Múltiple') {
+                    const definitionLabel = document.createElement('label');
+                    definitionLabel.textContent = 'Escribe tu respuesta aquí:';
+                    definitionLabel.style.fontWeight = 'normal';
+                    definitionLabel.style.display = 'block';
+                    definitionLabel.style.marginTop = '15px';
+                    definitionLabel.style.marginBottom = '5px';
+                    questionBlock.appendChild(definitionLabel);
+                    
+                    const textarea = document.createElement('textarea');
+                    textarea.id = `question-${q.id}-definition`;
+                    textarea.placeholder = 'Escribe tu definición aquí...';
+                    textarea.classList.add('large-fill-in-textarea');
+                    textarea.addEventListener('input', (event) => {
+                        event.target.value = event.target.value.toUpperCase();
+                    });
+                    questionBlock.appendChild(textarea);
+                    
+                    const selectionTitle = document.createElement('p');
+                    selectionTitle.textContent = 'Selecciona la opción correcta:';
+                    selectionTitle.style.fontWeight = 'normal';
+                    selectionTitle.style.marginTop = '15px';
+                    selectionTitle.style.marginBottom = '5px';
+                    questionBlock.appendChild(selectionTitle);
+
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    q.options.forEach(option => {
+                        const label = document.createElement('label');
+                        const input = document.createElement('input');
+                        input.type = 'radio';
+                        input.name = `question-${q.id}`;
+                        input.value = option;
+                        input.addEventListener('change', (e) => {
+                            const relatedTextarea = document.getElementById(`question-${q.id}-definition`);
+                            if (relatedTextarea) {
+                                relatedTextarea.value = e.target.value;
+                            }
+                        });
+                        label.appendChild(input);
+                        label.appendChild(document.createTextNode(option));
+                        optionsDiv.appendChild(label);
+                    });
+                    questionBlock.appendChild(optionsDiv);
+                } else if (q.type === 'Opción Múltiple (única respuesta)' || q.type === 'Verdadero o Falso') {
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    q.options.forEach(option => {
+                        const label = document.createElement('label');
+                        const input = document.createElement('input');
+                        input.type = 'radio';
+                        input.name = `question-${q.id}`;
+                        input.value = option;
+                        label.appendChild(input);
+                        label.appendChild(document.createTextNode(option));
+                        optionsDiv.appendChild(label);
+                    });
+                    questionBlock.appendChild(optionsDiv);
+                } else if (q.type === 'Opción Múltiple (múltiples respuestas)') {
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    q.options.forEach(option => {
+                        const label = document.createElement('label');
+                        const input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.name = `question-${q.id}`;
+                        input.value = option;
+                        label.appendChild(input);
+                        label.appendChild(document.createTextNode(option));
+                        optionsDiv.appendChild(label);
+                    });
+                    questionBlock.appendChild(optionsDiv);
+                } else if (q.type === 'Relacionar Columnas (Numérico)') {
+                    const referenceListDiv = document.createElement('div');
+                    referenceListDiv.className = 'matching-list';
+                    const referenceTitle = document.createElement('p');
+                    referenceTitle.textContent = "Características:";
+                    referenceListDiv.appendChild(referenceTitle);
+                    const ul = document.createElement('ul');
+                    q.referenceList.forEach(item => {
+                        const li = document.createElement('li');
+                        const abbreviatedItem = item.split(':')[0];
+                        li.textContent = abbreviatedItem;
+                        ul.appendChild(li);
+                    });
+                    referenceListDiv.appendChild(ul);
+                    questionBlock.appendChild(referenceListDiv);
+
+                    const definitionsTitle = document.createElement('p');
+                    definitionsTitle.textContent = "Relaciona las siguientes definiciones con los números de las características:";
+                    questionBlock.appendChild(definitionsTitle);
+                    
+                    const definitionsDiv = document.createElement('div');
+                    q.definitions.forEach((definition, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'numeric-matching-item';
+                        
+                        const definitionText = document.createElement('p');
+                        definitionText.textContent = `${definition}`;
+                        item.appendChild(definitionText);
+
+                        const input = document.createElement('input');
+                        input.type = 'number';
+                        input.min = '1';
+                        input.max = '7'; 
+                        input.placeholder = `Respuesta`;
+                        input.setAttribute('data-definition', definition);
+                        item.appendChild(input);
+
+                        definitionsDiv.appendChild(item);
+                    });
+                    questionBlock.appendChild(definitionsDiv);
+                } else if (q.type === 'Completar') {
+                    const optionsDiv = document.createElement('div'); 
+                    optionsDiv.className = 'options'; 
+                    let inputField;
+                    if (q.id === 8 || q.id === 9) {
+                        inputField = document.createElement('textarea');
+                        inputField.classList.add('large-fill-in-textarea'); 
+                        inputField.rows = 4;
+                    } else {
+                        inputField = document.createElement('input');
+                        inputField.type = 'text';
+                    }
+                    inputField.name = `question-${q.id}`;
+                    inputField.placeholder = 'Escribe tu respuesta aquí';
+                    inputField.setAttribute('autocomplete', 'off');
+                    inputField.addEventListener('input', (event) => {
+                        event.target.value = event.target.value.toUpperCase();
+                    });
+                    optionsDiv.appendChild(inputField);
+                    questionBlock.appendChild(optionsDiv);
+                }
+
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = 'feedback';
+                questionBlock.appendChild(feedbackDiv);
+                
+                questionsContainer.appendChild(questionBlock);
+            });
+            totalQuestionsSpan.textContent = questions.length;
+            evaluateBtn.disabled = false;
+            downloadPdfBtn.disabled = true;
+        }
+
+        function toggleAnswerFields(disabled) {
+            document.querySelectorAll('.question-block input, .question-block textarea').forEach(field => {
+                field.disabled = disabled;
+                if (disabled && attemptCount === 2) {
+                    const questionId = field.closest('.question-block').getAttribute('data-question-id');
+                    const question = questions.find(q => q.id == questionId);
+                    
+                    if (question.type === 'Definición y Opción Múltiple' && field.type === 'radio' && field.value === question.correctAnswer) {
+                        field.checked = true;
+                    }
+                    if (question.type === 'Completar' && (field.name === `question-${question.id}` || field.name === `question-${question.id}-definition`)) {
+                        field.value = question.correctAnswer;
+                    }
+                    if (question.type === 'Opción Múltiple (única respuesta)' && field.value === question.correctAnswer) {
+                        field.checked = true;
+                    }
+                    if (question.type === 'Verdadero o Falso' && field.value === question.correctAnswer) {
+                        field.checked = true;
+                    }
+                    if (question.type === 'Opción Múltiple (múltiples respuestas)' && question.correctAnswers.includes(field.value)) {
+                        field.checked = true;
+                    }
+                    if (question.type === 'Relacionar Columnas (Numérico)') {
+                        const definition = field.getAttribute('data-definition');
+                        if (definition && question.correctAnswers[definition]) {
+                            field.value = question.correctAnswers[definition];
+                        }
+                    }
+                }
+            });
+        }
+
+        function clearUserAnswersAndFeedback() {
+            document.querySelectorAll('.question-block input[type="radio"], .question-block input[type="checkbox"]').forEach(input => {
+                input.checked = false;
+            });
+            document.querySelectorAll('.question-block input[type="text"], .question-block textarea, .question-block input[type="number"]').forEach(input => {
+                input.value = '';
+            });
+            document.querySelectorAll('.feedback').forEach(feedbackDiv => {
+                feedbackDiv.textContent = '';
+                feedbackDiv.classList.remove('correct', 'incorrect');
+                feedbackDiv.style.display = 'none'; // Ocultar el feedback
+            });
+            scoreContainer.style.display = 'none';
+            score = 0;
+            finalScoreSpan.textContent = score;
+        }
+
+        function validateHeaderFields() {
+            const requiredFields = document.querySelectorAll('.header-fields input[required], .header-fields select[required], .header-fields textarea[required]');
+            for (const field of requiredFields) {
+                if (field.value.trim() === '' || (field.tagName === 'SELECT' && field.value === '')) {
+                    showMessage(`Por favor, complete el campo obligatorio: ${field.previousElementSibling.textContent.replace(':', '')}`);
+                    field.focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        document.getElementById('rap').addEventListener('input', (event) => {
+            event.target.value = event.target.value.toUpperCase();
+        });
+        document.querySelectorAll('.header-fields input[uppercase]').forEach(input => {
+            input.addEventListener('input', (event) => {
+                event.target.value = event.target.value.toUpperCase();
+            });
+        });
+        
+        evaluateBtn.addEventListener('click', () => {
+            if (!validateHeaderFields()) {
+                return;
+            }
+            
+            for (const q of questions) {
+                const questionBlock = document.querySelector(`.question-block[data-question-id='${q.id}']`);
+                
+                if (q.type === 'Opción Múltiple (múltiples respuestas)') {
+                    const checkedOptions = Array.from(questionBlock.querySelectorAll(`input[name="question-${q.id}"]:checked`));
+                    
+                    const match = q.question.match(/\d+/);
+                    const requiredCount = match ? parseInt(match[0], 10) : null;
+                    const checkedCount = checkedOptions.length;
+
+                    if (requiredCount !== null && checkedCount !== requiredCount) {
+                        showMessage(`Para la pregunta ${q.id}, debes seleccionar exactamente ${requiredCount} opciones para poder continuar.`);
+                        return;
+                    }
+                }
+                
+                if (q.type === 'Relacionar Columnas (Numérico)') {
+                    const numericInputs = questionBlock.querySelectorAll('input[type="number"]');
+                    for (const input of numericInputs) {
+                        if (input.value.trim() === '') {
+                            showMessage(`La pregunta ${q.id} es de relacionar columnas y requiere que todas las casillas sean respondidas.`);
+                            return;
+                        }
+                    }
+                }
+
+                if (q.type === 'Completar') {
+                    const inputField = questionBlock.querySelector(`input[name="question-${q.id}"], textarea[name="question-${q.id}"]`);
+                    if (inputField && inputField.value.trim() === '') {
+                        showMessage(`La pregunta ${q.id} es obligatoria. Por favor, complete la respuesta.`);
+                        return;
+                    }
+                }
+            }
+            
+            attemptCount++;
+            score = 0;
+
+            questions.forEach(q => {
+                const questionBlock = document.querySelector(`.question-block[data-question-id='${q.id}']`);
+                const feedbackDiv = questionBlock.querySelector('.feedback');
+                let isCorrect = false;
+
+                if (q.type === 'Definición y Opción Múltiple' || q.type === 'Opción Múltiple (única respuesta)' || q.type === 'Verdadero o Falso') {
+                    const selectedOption = questionBlock.querySelector(`input[name="question-${q.id}"]:checked`);
+                    if (selectedOption && selectedOption.value === q.correctAnswer) {
+                        isCorrect = true;
+                    }
+                } else if (q.type === 'Opción Múltiple (múltiples respuestas)') {
+                    const checkedOptions = Array.from(questionBlock.querySelectorAll(`input[name="question-${q.id}"]:checked`)).map(input => input.value).sort();
+                    const correctAnswersSorted = q.correctAnswers.sort();
+                    if (JSON.stringify(checkedOptions) === JSON.stringify(correctAnswersSorted)) {
+                        isCorrect = true;
+                    }
+                } else if (q.type === 'Relacionar Columnas (Numérico)') {
+                    isCorrect = true;
+                    for (const definition in q.correctAnswers) {
+                        const input = questionBlock.querySelector(`input[data-definition="${definition}"]`);
+                        if (!input || parseInt(input.value) !== q.correctAnswers[definition]) {
+                            isCorrect = false;
+                            break;
+                        }
+                    }
+                } else if (q.type === 'Completar') {
+                    const inputField = questionBlock.querySelector(`input[name="question-${q.id}"], textarea[name="question-${q.id}"]`);
+                    if (inputField && inputField.value.trim().toUpperCase() === q.correctAnswer.toUpperCase()) {
+                        isCorrect = true;
+                    }
+                }
+
+                if (isCorrect) {
+                    score++;
+                    feedbackDiv.textContent = 'Respuesta Correcta';
+                    feedbackDiv.classList.add('correct');
+                    feedbackDiv.classList.remove('incorrect');
+                } else {
+                    feedbackDiv.textContent = 'Respuesta Incorrecta';
+                    feedbackDiv.classList.add('incorrect');
+                    feedbackDiv.classList.remove('correct');
+                }
+                
+                // Mostrar el feedback en la página web solo en el segundo intento
+                if (attemptCount === 2) {
+                    feedbackDiv.style.display = 'block';
+                }
+            });
+
+            finalScoreSpan.textContent = score;
+            scoreContainer.style.display = 'block';
+            toggleAnswerFields(true);
+            evaluateBtn.disabled = true;
+            secondAttemptBtn.disabled = (attemptCount >= 2);
+            downloadPdfBtn.disabled = false;
+        });
+
+        secondAttemptBtn.addEventListener('click', () => {
+            clearUserAnswersAndFeedback();
+            toggleAnswerFields(false);
+            evaluateBtn.disabled = false;
+            secondAttemptBtn.disabled = true;
+            downloadPdfBtn.disabled = true;
+        });
+
+        downloadPdfBtn.addEventListener('click', () => {
+            if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+                showMessage("Error: La biblioteca jsPDF no está cargada. Intente de nuevo más tarde.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let yOffset = 20;
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 20;
+            const maxContentWidth = pageWidth - 2 * margin;
+            const lineHeight = 7; 
+            const boxHeight = 10;
+            const boxMargin = 3;
+
+            function addWrappedText(text, x, y, maxWidth, fontSize) {
+                doc.setFontSize(fontSize);
+                const lines = doc.splitTextToSize(text, maxWidth);
+                doc.text(lines, x, y);
+                return y + (lines.length * lineHeight);
+            }
+            
+            function checkAndAddPage(estimatedHeight) {
+                if (yOffset + estimatedHeight > pageHeight - margin) {
+                    doc.addPage();
+                    yOffset = margin;
+                }
+            }
+
+            doc.setTextColor(0, 77, 153);
+            doc.setFontSize(22);
+            doc.text("EVALUACION", pageWidth / 2, yOffset, { align: 'center' });
+            yOffset += 10;
+            doc.setFontSize(18);
+            doc.text("PROGRAMA SENATIC", pageWidth / 2, yOffset, { align: 'center' });
+            yOffset += 10;
+            doc.setFontSize(16);
+            doc.text("TECNICO SISTEMAS TELEINFORMATICOS", pageWidth / 2, yOffset, { align: 'center' });
+            yOffset += 15;
+            
+            doc.setTextColor(0, 0, 0);
+
+            const headerFields = [
+                { label: "COMPETENCIA:", value: document.getElementById('competencia').value },
+                { label: "RAP:", value: document.getElementById('rap').value },
+                { label: "TIPO DE INSTRUMENTO:", value: document.getElementById('tipoInstrumento').value },
+                { label: "FICHA:", value: document.getElementById('ficha').value },
+                { label: "FECHA:", value: document.getElementById('fecha').value },
+                { label: "NOMBRE DEL APRENDIZ:", value: document.getElementById('nombreAprendiz').value },
+                { label: "NOMBRE DEL INSTRUCTOR:", value: document.getElementById('nombreInstructor').value },
+            ];
+
+            headerFields.forEach(field => {
+                let currentY = yOffset;
+                let boxHeightForField;
+
+                if (field.label === "RAP:") {
+                    const labelText = field.label;
+                    const valueText = field.value.toLowerCase();
+                    doc.setFont('helvetica', 'bold');
+                    const labelLines = doc.splitTextToSize(labelText, maxContentWidth);
+                    const valueLines = doc.splitTextToSize(valueText, maxContentWidth - 5);
+                    boxHeightForField = (labelLines.length + valueLines.length) * lineHeight + 4;
+                } else {
+                    boxHeightForField = boxHeight;
+                }
+
+                checkAndAddPage(boxHeightForField + boxMargin);
+                
+                let fillColor;
+                if (field.label === "NOMBRE DEL APRENDIZ:") {
+                    fillColor = [220, 230, 255];
+                } else {
+                    fillColor = [255, 255, 204];
+                }
+
+                doc.setFillColor(fillColor[0], fillColor[1], fillColor[2]);
+                doc.rect(margin, currentY, maxContentWidth, boxHeightForField, 'F');
+                doc.setFontSize(12);
+
+                if (field.label === "RAP:") {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(field.label, margin + 2, currentY + lineHeight - 1.5);
+                    doc.setFont('helvetica', 'normal');
+                    const valueText = field.value.toLowerCase();
+                    yOffset = addWrappedText(valueText, margin + 5, currentY + lineHeight * 2 - 2, maxContentWidth - 5, 12);
+                    yOffset += boxMargin;
+                } else {
+                    const labelText = field.label;
+                    const valueText = field.value;
+                    const labelWidth = doc.getTextWidth(labelText);
+
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(labelText, margin + 2, currentY + (boxHeightForField / 2) + 2);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(valueText, margin + 2 + labelWidth + 2, currentY + (boxHeightForField / 2) + 2);
+                    yOffset += boxHeightForField + boxMargin;
+                }
+            });
+            
+            yOffset += 5;
+            doc.setLineWidth(0.5);
+            doc.line(margin, yOffset, pageWidth - margin, yOffset);
+            yOffset += 10;
+
+            doc.setFontSize(16);
+            doc.text("PREGUNTAS Y RESPUESTAS", pageWidth / 2, yOffset, { align: 'center' });
+            yOffset += 15;
+
+            questions.forEach((q, index) => {
+                let estimatedHeight = 20;
+                if (q.type === 'Relacionar Columnas (Numérico)') {
+                    estimatedHeight += (q.definitions.length + q.referenceList.length) * 8;
+                } else if (q.type === 'Opción Múltiple (múltiples respuestas)') {
+                    estimatedHeight += (q.options.length * 6) + 10;
+                } else if (q.type === 'Definición y Opción Múltiple') {
+                    estimatedHeight += 40;
+                } else {
+                    estimatedHeight += 25;
+                }
+                
+                checkAndAddPage(estimatedHeight);
+
+                doc.setFontSize(14);
+                yOffset = addWrappedText(`${q.id}. ${q.question}`, margin, yOffset, maxContentWidth, 14);
+                yOffset += 4;
+
+                const questionBlock = document.querySelector(`.question-block[data-question-id='${q.id}']`);
+                const feedbackDiv = questionBlock.querySelector('.feedback');
+                let userAnswer = "";
+                let correctAnswer = "";
+
+                doc.setFontSize(12);
+                if (q.type === 'Definición y Opción Múltiple' || q.type === 'Opción Múltiple (única respuesta)' || q.type === 'Verdadero o Falso') {
+                    const selectedOption = questionBlock.querySelector(`input[name="question-${q.id}"]:checked`);
+                    userAnswer = selectedOption ? selectedOption.value : "No respondido";
+                    correctAnswer = q.correctAnswer;
+                    if (q.type === 'Definición y Opción Múltiple') {
+                        const definitionTextarea = document.getElementById(`question-${q.id}-definition`);
+                        const userDefinition = definitionTextarea.value.trim() !== '' ? definitionTextarea.value : "No respondido";
+                        yOffset = addWrappedText(`Definición del Aprendiz: ${userDefinition}`, margin + 5, yOffset, maxContentWidth - 5, 12);
+                        yOffset += 2;
+                    }
+                    yOffset = addWrappedText(`Opción Seleccionada: ${userAnswer}`, margin + 5, yOffset, maxContentWidth - 5, 12);
+                    yOffset += 2;
+                    yOffset = addWrappedText(`Respuesta Correcta: ${correctAnswer}`, margin + 5, yOffset, maxContentWidth - 5, 12);
+                    yOffset += 2;
+                } else if (q.type === 'Opción Múltiple (múltiples respuestas)') {
+                    const checkedOptions = Array.from(questionBlock.querySelectorAll(`input[name="question-${q.id}"]:checked`)).map(input => input.value);
+                    userAnswer = checkedOptions.length > 0 ? checkedOptions.join(', ') : "No respondido";
+                    correctAnswer = q.correctAnswers.join(', ');
+                    yOffset = addWrappedText(`Opción Seleccionada: ${userAnswer}`, margin + 5, yOffset, maxContentWidth - 5, 12);
+                    yOffset += 2;
+                    yOffset = addWrappedText(`Respuesta Correcta: ${correctAnswer}`, margin + 5, yOffset, maxContentWidth - 5, 12);
+                    yOffset += 2;
+                } else if (q.type === 'Relacionar Columnas (Numérico)') {
+                    let userAnswers = [];
+                    let correctAnswers = [];
+                    for (const definition in q.correctAnswers) {
+                        const input = questionBlock.querySelector(`input[data-definition="${definition}"]`);
+                        userAnswers.push(`"${definition}" - Respuesta: ${input ? input.value : "No respondido"}`);
+                        correctAnswers.push(`"${definition}" - Correcta: ${q.correctAnswers[definition]}`);
+                    }
+                    yOffset = addWrappedText("Opción Seleccionada:", margin + 5, yOffset, maxContentWidth - 5, 12);
+                    yOffset += 2;
+                    userAnswers.forEach(answer => {
+                        yOffset = addWrappedText(answer, margin + 10, yOffset, maxContentWidth - 10, 12);
+                    });
+                    yOffset += 2;
+                    yOffset = addWrappedText("Respuesta Correcta:", margin + 5, yOffset, maxContentWidth - 5, 12);
+                    yOffset += 2;
+                    correctAnswers.forEach(answer => {
+                        yOffset = addWrappedText(answer, margin + 10, yOffset, maxContentWidth - 10, 12);
+                    });
+                    yOffset += 2;
+                } else if (q.type === 'Completar') {
+                    const inputField = questionBlock.querySelector(`input[name="question-${q.id}"], textarea[name="question-${q.id}"]`);
+                    userAnswer = inputField ? inputField.value.trim() : "No respondido";
+                    correctAnswer = q.correctAnswer;
+                    yOffset = addWrappedText(`Opción Seleccionada: ${userAnswer}`, margin + 5, yOffset, maxContentWidth - 5, 12);
+                    yOffset += 2;
+                    yOffset = addWrappedText(`Respuesta Correcta: ${correctAnswer}`, margin + 5, yOffset, maxContentWidth - 5, 12);
+                    yOffset += 2;
+                }
+                
+                // Mostrar el estado de la pregunta en el PDF, independientemente del intento
+                const statusText = `Estado: (${feedbackDiv.textContent.replace('Respuesta ', '')})`;
+                doc.setFontSize(12);
+                const textWidth = doc.getTextWidth(statusText);
+                const rectX = margin + 5;
+                const rectY = yOffset;
+                const rectWidth = textWidth + 4;
+                const rectHeight = lineHeight;
+                
+                if (feedbackDiv.classList.contains('correct')) {
+                    doc.setFillColor(220, 255, 220);
+                } else if (feedbackDiv.classList.contains('incorrect')) {
+                    doc.setFillColor(255, 220, 220);
+                } else {
+                    doc.setFillColor(255, 255, 255);
+                }
+                
+                doc.rect(rectX, rectY, rectWidth, rectHeight, 'F');
+                doc.setTextColor(0, 0, 0);
+                doc.text(statusText, rectX + 2, rectY + lineHeight - 1.5);
+                yOffset += lineHeight + 2;
+
+
+                if (index < questions.length - 1) {
+                    checkAndAddPage(5);
+                    doc.setLineWidth(0.5);
+                    doc.line(margin, yOffset, pageWidth - margin, yOffset);
+                    yOffset += 5;
+                }
+            });
+
+            yOffset += 10;
+            checkAndAddPage(10);
+            
+            const finalScoreText = `Puntaje Final: ${finalScoreSpan.textContent} / ${totalQuestionsSpan.textContent}`;
+            doc.setFontSize(18);
+            const finalScoreTextWidth = doc.getTextWidth(finalScoreText);
+            const finalScoreX = (pageWidth - finalScoreTextWidth) / 2;
+
+            doc.setFillColor(255, 255, 0);
+            doc.rect(finalScoreX - 5, yOffset + 5 - 15, finalScoreTextWidth + 10, 20, 'F');
+
+            doc.setTextColor(0, 77, 153);
+            doc.text(finalScoreText, finalScoreX, yOffset + 5);
+
+            doc.save('evaluacion_senatic.pdf');
+        });
+
+        renderQuestions();
+    });
+</script>
+</body>
+</html>
